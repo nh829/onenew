@@ -3,16 +3,6 @@
         "tag": "h1",
         "title": "编程学习",
         "content": [
-            {
-                "title": "MDN Web 文档",
-                "url": "https://developer.mozilla.org/zh-CN/",
-                "accessible": true
-            },
-            {
-                "title": "菜鸟教程",
-                "url": "https://www.runoob.com/",
-                "accessible": true
-            }
         ],
         "children": [
             {
