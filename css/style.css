@@ -135,4 +135,9 @@ body {
     background-color: yellow;
     padding: 2px;
     border-radius: 2px;
+}
+
+/* 内容区层级缩进 */
+.content-section {
+    margin-bottom: 16px;
 } 
