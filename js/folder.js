@@ -1,87 +1,107 @@
-// 文件夹功能
-// 该版本直接递归渲染树状结构的数据
+// 文件夹功能（新版：左侧树状目录+右侧单节点内容区）
 class FolderManager {
     constructor() {
         this.folderNav = document.getElementById('folder-nav');
         this.content = document.getElementById('content');
         this.folders = [];
+        this.activeFolder = null; // 当前选中的文件夹节点
     }
 
     // 初始化文件夹结构
     init(data) {
-        // 直接使用树状结构
         this.folders = data;
         this.renderFolderNav();
-        this.renderContent();
+        // 默认选中第一个文件夹
+        const firstFolder = this.findFirstFolder(this.folders);
+        if (firstFolder) {
+            this.setActiveFolder(firstFolder);
+        }
     }
 
-    // 渲染文件夹导航
+    // 递归查找第一个文件夹节点
+    findFirstFolder(folders) {
+        if (!folders || folders.length === 0) return null;
+        return folders[0];
+    }
+
+    // 设置当前激活的文件夹并渲染内容
+    setActiveFolder(folder) {
+        this.activeFolder = folder;
+        this.renderFolderNav(); // 重新渲染高亮
+        this.renderContent(folder);
+    }
+
+    // 渲染左侧树状目录
     renderFolderNav() {
         this.folderNav.innerHTML = '';
         this.folders.forEach(folder => {
-            this.renderFolder(folder, this.folderNav);
+            this.renderFolderNode(folder, this.folderNav, 1);
         });
     }
 
-    // 渲染单个文件夹（递归）
-    renderFolder(folder, parentElement) {
+    // 递归渲染单个文件夹节点
+    renderFolderNode(folder, parentElement, level) {
         const folderElement = document.createElement('div');
         folderElement.className = 'folder';
-        folderElement.dataset.level = folder.tag || 'h1';
+        folderElement.style.marginLeft = `${(level - 1) * 16}px`;
+        if (this.activeFolder === folder) {
+            folderElement.classList.add('active-folder');
+        }
 
+        // 文件夹头部
         const header = document.createElement('div');
         header.className = 'folder-header';
         header.innerHTML = `
-            <i class="fas fa-folder"></i>
+            <i class="fas fa-folder${folderElement.classList.contains('active-folder') ? '-open' : ''}"></i>
             <span>${folder.title}</span>
         `;
-
-        const content = document.createElement('div');
-        content.className = 'folder-content';
-
-        folderElement.appendChild(header);
-        folderElement.appendChild(content);
-
-        // 点击展开/折叠
-        header.addEventListener('click', () => {
-            folderElement.classList.toggle('active');
-            const icon = header.querySelector('i');
-            icon.classList.toggle('fa-folder');
-            icon.classList.toggle('fa-folder-open');
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.setActiveFolder(folder);
         });
+        folderElement.appendChild(header);
 
-        // 递归渲染子文件夹
-        if (folder.children && folder.children.length > 0) {
-            folder.children.forEach(child => {
-                this.renderFolder(child, content);
-            });
+        // 子文件夹和链接
+        if ((folder.children && folder.children.length > 0) || (folder.content && folder.content.length > 0)) {
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'folder-content';
+            // 子文件夹
+            if (folder.children && folder.children.length > 0) {
+                folder.children.forEach(child => {
+                    this.renderFolderNode(child, contentDiv, level + 1);
+                });
+            }
+            // 链接
+            if (folder.content && folder.content.length > 0) {
+                folder.content.forEach(link => {
+                    const linkDiv = document.createElement('div');
+                    linkDiv.className = 'link-item';
+                    linkDiv.style.marginLeft = `${8}px`;
+                    linkDiv.innerHTML = `
+                        <span class="link-status ${link.accessible ? 'accessible' : 'inaccessible'}">
+                            ${link.accessible ? '✅' : '❌'}
+                        </span>
+                        <a href="${link.url}" target="_blank">${link.title}</a>
+                    `;
+                    // 链接点击直接跳转，无需事件
+                    contentDiv.appendChild(linkDiv);
+                });
+            }
+            folderElement.appendChild(contentDiv);
         }
-
         parentElement.appendChild(folderElement);
     }
 
-    // 渲染内容区域
-    renderContent() {
+    // 渲染右侧内容区：只显示当前选中文件夹下的内容
+    renderContent(folder) {
         this.content.innerHTML = '';
-        this.folders.forEach(folder => {
-            this.renderFolderContent(folder, this.content, 1);
-        });
-    }
-
-    // 渲染文件夹内容（递归，带层级缩进）
-    renderFolderContent(folder, parentElement, level = 1) {
-        const section = document.createElement('section');
-        section.className = `content-section level-${level}`;
-        section.style.marginLeft = `${(level - 1) * 24}px`;
-        section.style.marginBottom = '16px';
-
-        // 选择合适的标题标签
-        const headingTag = `h${Math.min(level, 6)}`;
-        const heading = document.createElement(headingTag);
+        if (!folder) return;
+        // 标题
+        const heading = document.createElement('h2');
         heading.textContent = folder.title;
-        section.appendChild(heading);
-
-        // 渲染链接内容
+        this.content.appendChild(heading);
+        // 链接
         if (folder.content && folder.content.length > 0) {
             folder.content.forEach(link => {
                 const linkElement = document.createElement('div');
@@ -92,18 +112,15 @@ class FolderManager {
                     </span>
                     <a href="${link.url}" target="_blank">${link.title}</a>
                 `;
-                section.appendChild(linkElement);
+                this.content.appendChild(linkElement);
             });
         }
-
-        // 递归渲染子文件夹内容
+        // 子文件夹（递归）
         if (folder.children && folder.children.length > 0) {
             folder.children.forEach(child => {
-                this.renderFolderContent(child, section, level + 1);
+                this.renderContent(child);
             });
         }
-
-        parentElement.appendChild(section);
     }
 }
 
