@@ -64,16 +64,20 @@ class FolderManager {
     renderContent() {
         this.content.innerHTML = '';
         this.folders.forEach(folder => {
-            this.renderFolderContent(folder, this.content);
+            this.renderFolderContent(folder, this.content, 1);
         });
     }
 
-    // 渲染文件夹内容（递归）
-    renderFolderContent(folder, parentElement) {
+    // 渲染文件夹内容（递归，带层级缩进）
+    renderFolderContent(folder, parentElement, level = 1) {
         const section = document.createElement('section');
-        section.className = `content-section level-${folder.tag || 'h1'}`;
-        
-        const heading = document.createElement(folder.tag || 'h1');
+        section.className = `content-section level-${level}`;
+        section.style.marginLeft = `${(level - 1) * 24}px`;
+        section.style.marginBottom = '16px';
+
+        // 选择合适的标题标签
+        const headingTag = `h${Math.min(level, 6)}`;
+        const heading = document.createElement(headingTag);
         heading.textContent = folder.title;
         section.appendChild(heading);
 
@@ -95,7 +99,7 @@ class FolderManager {
         // 递归渲染子文件夹内容
         if (folder.children && folder.children.length > 0) {
             folder.children.forEach(child => {
-                this.renderFolderContent(child, section);
+                this.renderFolderContent(child, section, level + 1);
             });
         }
 
@@ -104,4 +108,4 @@ class FolderManager {
 }
 
 // 创建文件夹管理器实例
-const folderManager = new FolderManager();
+const folderManager = new FolderManager(); 
