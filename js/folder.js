@@ -1,4 +1,5 @@
 // 文件夹功能
+// 该版本直接递归渲染树状结构的数据
 class FolderManager {
     constructor() {
         this.folderNav = document.getElementById('folder-nav');
@@ -8,57 +9,10 @@ class FolderManager {
 
     // 初始化文件夹结构
     init(data) {
-        this.folders = this.parseHeadings(data);
+        // 直接使用树状结构
+        this.folders = data;
         this.renderFolderNav();
         this.renderContent();
-    }
-
-    // 解析标题层级
-    parseHeadings(data) {
-        const folders = [];
-        let currentLevel = 0;
-        let currentFolder = null;
-        let folderStack = [];
-
-        data.forEach(item => {
-            const level = this.getHeadingLevel(item.tag);
-            const folder = {
-                title: item.title,
-                level: level,
-                content: item.content || [],
-                children: []
-            };
-
-            if (level > currentLevel) {
-                // 进入子文件夹
-                if (currentFolder) {
-                    folderStack.push(currentFolder);
-                }
-                currentFolder = folder;
-                currentLevel = level;
-            } else if (level < currentLevel) {
-                // 返回上级文件夹
-                while (level < currentLevel && folderStack.length > 0) {
-                    const parent = folderStack.pop();
-                    parent.children.push(currentFolder);
-                    currentFolder = parent;
-                    currentLevel--;
-                }
-            }
-
-            if (currentFolder) {
-                currentFolder.children.push(folder);
-            } else {
-                folders.push(folder);
-            }
-        });
-
-        return folders;
-    }
-
-    // 获取标题层级
-    getHeadingLevel(tag) {
-        return parseInt(tag.replace('h', ''));
     }
 
     // 渲染文件夹导航
@@ -69,11 +23,11 @@ class FolderManager {
         });
     }
 
-    // 渲染单个文件夹
+    // 渲染单个文件夹（递归）
     renderFolder(folder, parentElement) {
         const folderElement = document.createElement('div');
         folderElement.className = 'folder';
-        folderElement.dataset.level = folder.level;
+        folderElement.dataset.level = folder.tag || 'h1';
 
         const header = document.createElement('div');
         header.className = 'folder-header';
@@ -88,7 +42,7 @@ class FolderManager {
         folderElement.appendChild(header);
         folderElement.appendChild(content);
 
-        // 添加点击事件
+        // 点击展开/折叠
         header.addEventListener('click', () => {
             folderElement.classList.toggle('active');
             const icon = header.querySelector('i');
@@ -97,9 +51,11 @@ class FolderManager {
         });
 
         // 递归渲染子文件夹
-        folder.children.forEach(child => {
-            this.renderFolder(child, content);
-        });
+        if (folder.children && folder.children.length > 0) {
+            folder.children.forEach(child => {
+                this.renderFolder(child, content);
+            });
+        }
 
         parentElement.appendChild(folderElement);
     }
@@ -112,36 +68,40 @@ class FolderManager {
         });
     }
 
-    // 渲染文件夹内容
+    // 渲染文件夹内容（递归）
     renderFolderContent(folder, parentElement) {
         const section = document.createElement('section');
-        section.className = `content-section level-${folder.level}`;
+        section.className = `content-section level-${folder.tag || 'h1'}`;
         
         const heading = document.createElement(folder.tag || 'h1');
         heading.textContent = folder.title;
         section.appendChild(heading);
 
         // 渲染链接内容
-        folder.content.forEach(link => {
-            const linkElement = document.createElement('div');
-            linkElement.className = 'link-item';
-            linkElement.innerHTML = `
-                <span class="link-status ${link.accessible ? 'accessible' : 'inaccessible'}">
-                    ${link.accessible ? '✅' : '❌'}
-                </span>
-                <a href="${link.url}" target="_blank">${link.title}</a>
-            `;
-            section.appendChild(linkElement);
-        });
+        if (folder.content && folder.content.length > 0) {
+            folder.content.forEach(link => {
+                const linkElement = document.createElement('div');
+                linkElement.className = 'link-item';
+                linkElement.innerHTML = `
+                    <span class="link-status ${link.accessible ? 'accessible' : 'inaccessible'}">
+                        ${link.accessible ? '✅' : '❌'}
+                    </span>
+                    <a href="${link.url}" target="_blank">${link.title}</a>
+                `;
+                section.appendChild(linkElement);
+            });
+        }
 
         // 递归渲染子文件夹内容
-        folder.children.forEach(child => {
-            this.renderFolderContent(child, section);
-        });
+        if (folder.children && folder.children.length > 0) {
+            folder.children.forEach(child => {
+                this.renderFolderContent(child, section);
+            });
+        }
 
         parentElement.appendChild(section);
     }
 }
 
 // 创建文件夹管理器实例
-const folderManager = new FolderManager(); 
+const folderManager = new FolderManager();
