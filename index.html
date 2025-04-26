@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源管理</title>
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="搜索资源...">
+        <div class="search-results" id="search-results"></div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 侧边栏导航 -->
+        <nav class="sidebar" id="folder-nav">
+            <!-- 文件夹导航将通过 JavaScript 动态生成 -->
+        </nav>
+
+        <!-- 内容区域 -->
+        <main class="content" id="content">
+            <!-- 内容将通过 JavaScript 动态加载 -->
+        </main>
+    </div>
+
+    <!-- JavaScript 文件 -->
+    <script src="js/theme.js"></script>
+    <script src="js/folder.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
