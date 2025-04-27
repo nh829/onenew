@@ -2,12 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('data/resources.json')
         .then(res => res.json())
         .then(data => {
-            // 如果第一个节点是 root，则只渲染 root.children
-            if (data.length === 1 && data[0].title === 'root' && data[0].children) {
-                renderDirectoryTree(data[0].children, document.querySelector('.directory-tree'));
-            } else {
-                renderDirectoryTree(data, document.querySelector('.directory-tree'));
-            }
+            renderDirectoryTree(data, document.querySelector('.directory-tree'));
         });
 });
 
