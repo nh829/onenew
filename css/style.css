@@ -107,6 +107,7 @@ body {
     padding: 1rem;
 }
 
+/* 目录树美化和自动换行，每行最多20个汉字 */
 .directory-tree ul {
     list-style: none;
     padding-left: 0;
@@ -124,15 +125,42 @@ body {
     cursor: pointer;
     user-select: none;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    min-width: 0; /* 允许子元素收缩 */
 }
 
 .directory-tree li > div:hover {
     background: var(--hover-color);
 }
 
-.directory-tree li span {
-    font-size: 1rem;
+.directory-tree li > div span {
+    display: inline-block;
+    max-width: 20em; /* 一行最多20个汉字 */
+    white-space: normal;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    vertical-align: top;
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.directory-tree .triangle {
+    display: inline-block;
+    width: 1em;
+    margin-right: 4px;
+    transition: transform 0.2s;
+    color: var(--primary-color);
+    font-size: 1.1em;
+    flex: none;
+}
+
+.directory-tree .collapsed {
+    transform: rotate(0deg);
+}
+
+.directory-tree .expanded {
+    transform: rotate(90deg);
 }
 
 .directory-tree li ul {
@@ -146,28 +174,12 @@ body {
     text-decoration: none;
     font-size: 0.98rem;
     transition: color 0.2s;
+    word-break: break-all;
 }
 
 .directory-tree a:hover {
     color: #ff9800;
     text-decoration: underline;
-}
-
-.directory-tree .triangle {
-    display: inline-block;
-    width: 1em;
-    margin-right: 4px;
-    transition: transform 0.2s;
-    color: var(--primary-color);
-    font-size: 1.1em;
-}
-
-.directory-tree .collapsed {
-    transform: rotate(0deg);
-}
-
-.directory-tree .expanded {
-    transform: rotate(90deg);
 }
 
 /* 资源展示区 */
@@ -317,14 +329,4 @@ body {
     .modal-content {
         width: 95%;
     }
-} 
-
-/* 目录树标题自动换行，每行最多20个汉字 */
-.directory-tree span {
-    display: inline-block;
-    max-width: 20em; /* 1em 约等于1个汉字宽度 */
-    white-space: normal; /* 允许自动换行 */
-    word-break: break-all; /* 强制长单词或连续汉字换行 */
-    overflow-wrap: break-word;
-    vertical-align: top;
 } 
