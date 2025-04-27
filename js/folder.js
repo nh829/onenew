@@ -139,4 +139,58 @@ themeToggle.addEventListener('click', () => {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     body.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-}); 
+});
+
+// 递归渲染多级目录树和资源
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('data/resources.json')
+        .then(res => res.json())
+        .then(data => {
+            renderDirectoryTree(data, document.querySelector('.directory-tree'));
+        });
+});
+
+// 递归渲染目录树
+function renderDirectoryTree(data, container, level = 1) {
+    if (!data || data.length === 0) return;
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.paddingLeft = (level - 1) * 16 + 'px';
+
+    data.forEach(item => {
+        const li = document.createElement('li');
+        li.style.margin = '4px 0';
+
+        // 目录标题
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = item.title;
+        titleSpan.style.fontWeight = level === 1 ? 'bold' : 'normal';
+        li.appendChild(titleSpan);
+
+        // 渲染本目录下的资源
+        if (item.content && item.content.length > 0) {
+            const resourceUl = document.createElement('ul');
+            resourceUl.style.listStyle = 'circle';
+            resourceUl.style.marginLeft = '16px';
+            item.content.forEach(link => {
+                const linkLi = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.title;
+                a.target = '_blank';
+                linkLi.appendChild(a);
+                resourceUl.appendChild(linkLi);
+            });
+            li.appendChild(resourceUl);
+        }
+
+        // 递归渲染子目录
+        if (item.children && item.children.length > 0) {
+            renderDirectoryTree(item.children, li, level + 1);
+        }
+
+        ul.appendChild(li);
+    });
+
+    container.appendChild(ul);
+} 
