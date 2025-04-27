@@ -143,51 +143,84 @@ themeToggle.addEventListener('click', () => {
 
 // 递归渲染多级目录树，支持一级、二级目录折叠/展开
 document.addEventListener('DOMContentLoaded', () => {
+    let allData = [];
     fetch('data/resources.json')
         .then(res => res.json())
         .then(data => {
+            allData = data;
             renderDirectoryTree(data, document.querySelector('.directory-tree'));
         });
+
+    // 搜索功能
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.querySelector('.search-btn');
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') doSearch();
+    });
+    searchBtn.addEventListener('click', doSearch);
+
+    function doSearch() {
+        const keyword = searchInput.value.trim().toLowerCase();
+        const tree = document.querySelector('.directory-tree');
+        tree.innerHTML = '';
+        if (!keyword) {
+            renderDirectoryTree(allData, tree);
+        } else {
+            const filtered = filterTree(allData, keyword);
+            renderDirectoryTree(filtered, tree, 1, keyword);
+        }
+    }
+
+    // 递归过滤目录树
+    function filterTree(data, keyword) {
+        return data.map(item => {
+            let match = item.title.toLowerCase().includes(keyword);
+            let filteredChildren = item.children ? filterTree(item.children, keyword) : [];
+            let filteredContent = item.content ? item.content.filter(link =>
+                link.title.toLowerCase().includes(keyword)
+            ) : [];
+            if (match || filteredChildren.length > 0 || filteredContent.length > 0) {
+                return {
+                    ...item,
+                    children: filteredChildren,
+                    content: filteredContent
+                };
+            }
+            return null;
+        }).filter(Boolean);
+    }
 });
 
-function renderDirectoryTree(data, container, level = 1) {
+// 递归渲染目录树，支持折叠/展开和高亮
+function renderDirectoryTree(data, container, level = 1, highlight = '') {
     if (!data || data.length === 0) return;
     const ul = document.createElement('ul');
-    ul.style.listStyle = 'none';
-    ul.style.paddingLeft = (level - 1) * 16 + 'px';
-
     data.forEach(item => {
         const li = document.createElement('li');
-        li.style.margin = '4px 0';
-
         // 是否有子目录
         const hasChildren = item.children && item.children.length > 0;
         // 是否有资源内容
         const hasContent = item.content && item.content.length > 0;
 
         // 展开/收缩图标
-        let icon = '';
+        let icon = null;
         if (level <= 2 && (hasChildren || hasContent)) {
             icon = document.createElement('span');
-            icon.textContent = '▶'; // 收缩时小三角
-            icon.style.cursor = 'pointer';
-            icon.style.display = 'inline-block';
-            icon.style.width = '1em';
-            icon.style.transition = 'transform 0.2s';
-            icon.style.marginRight = '4px';
+            icon.className = 'triangle collapsed';
+            icon.textContent = '▶';
         }
 
         // 目录标题
         const titleSpan = document.createElement('span');
-        titleSpan.textContent = item.title;
+        titleSpan.innerHTML = highlight && item.title.toLowerCase().includes(highlight)
+            ? item.title.replace(new RegExp(highlight, 'gi'), m => `<mark>${m}</mark>`)
+            : item.title;
         titleSpan.style.fontWeight = level === 1 ? 'bold' : 'normal';
         titleSpan.style.cursor = (level <= 2 && (hasChildren || hasContent)) ? 'pointer' : 'default';
 
         // 容器：用于包裹标题和图标
         const header = document.createElement('div');
-        header.style.display = 'flex';
-        header.style.alignItems = 'center';
-        if (icon) header.appendChild(icon);
+        header.appendChild(icon || document.createTextNode(''));
         header.appendChild(titleSpan);
         li.appendChild(header);
 
@@ -198,13 +231,13 @@ function renderDirectoryTree(data, container, level = 1) {
         // 渲染资源链接（三级内容）
         if (hasContent) {
             const resourceUl = document.createElement('ul');
-            resourceUl.style.listStyle = 'circle';
-            resourceUl.style.marginLeft = '16px';
             item.content.forEach(link => {
                 const linkLi = document.createElement('li');
                 const a = document.createElement('a');
                 a.href = link.url;
-                a.textContent = link.title;
+                a.textContent = highlight && link.title.toLowerCase().includes(highlight)
+                    ? link.title.replace(new RegExp(highlight, 'gi'), m => `<mark>${m}</mark>`)
+                    : link.title;
                 a.target = '_blank';
                 linkLi.appendChild(a);
                 resourceUl.appendChild(linkLi);
@@ -214,30 +247,27 @@ function renderDirectoryTree(data, container, level = 1) {
 
         // 递归渲染子目录
         if (hasChildren) {
-            renderDirectoryTree(item.children, childContainer, level + 1);
+            renderDirectoryTree(item.children, childContainer, level + 1, highlight);
         }
 
         // 一级、二级目录可折叠
         if (level <= 2 && (hasChildren || hasContent)) {
-            // 默认收缩（可改为 childContainer.style.display = 'block' 默认展开）
             header.addEventListener('click', function (e) {
                 e.stopPropagation();
                 if (childContainer.style.display === 'none') {
                     childContainer.style.display = 'block';
-                    if (icon) icon.style.transform = 'rotate(90deg)';
+                    if (icon) icon.className = 'triangle expanded';
                 } else {
                     childContainer.style.display = 'none';
-                    if (icon) icon.style.transform = 'rotate(0deg)';
+                    if (icon) icon.className = 'triangle collapsed';
                 }
             });
         } else {
-            // 三级内容不折叠
             childContainer.style.display = 'block';
         }
 
         li.appendChild(childContainer);
         ul.appendChild(li);
     });
-
     container.appendChild(ul);
 } 
