@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const keyword = searchInput.value.trim().toLowerCase();
         const tree = document.querySelector('.directory-tree');
         tree.innerHTML = '';
+        document.querySelector('.content').innerHTML = '';
         if (!keyword) {
             renderDirectoryTree(allData, tree);
         } else {
