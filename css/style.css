@@ -136,7 +136,7 @@ body {
 
 .directory-tree li > div span {
     display: inline-block;
-    max-width: 20em; /* 一行最多20个汉字 */
+    max-width: 30em; /* 一行最多20个汉字 */
     white-space: normal;
     word-break: break-all;
     overflow-wrap: break-word;
