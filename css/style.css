@@ -318,3 +318,13 @@ body {
         width: 95%;
     }
 } 
+
+/* 目录树标题自动换行，每行最多20个汉字 */
+.directory-tree span {
+    display: inline-block;
+    max-width: 20em; /* 1em 约等于1个汉字宽度 */
+    white-space: normal; /* 允许自动换行 */
+    word-break: break-all; /* 强制长单词或连续汉字换行 */
+    overflow-wrap: break-word;
+    vertical-align: top;
+} 
