@@ -145,6 +145,8 @@ body {
     overflow-wrap: break-word;
     vertical-align: top;
     flex: 1 1 auto; /* 允许自动扩展 */
+    white-space: nowrap;
+    max-width: none;
 }
 
 .directory-tree .triangle {
