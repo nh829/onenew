@@ -163,7 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const keyword = searchInput.value.trim().toLowerCase();
         const tree = document.querySelector('.directory-tree');
         tree.innerHTML = '';
-        document.querySelector('.content').innerHTML = '';
+        // 只隐藏右侧内容区的内容（如果有需要）
+const resourceGrid = document.getElementById('resourceGrid');
+if (resourceGrid) resourceGrid.innerHTML = '';
         if (!keyword) {
             renderDirectoryTree(allData, tree);
         } else {
