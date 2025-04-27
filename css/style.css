@@ -105,6 +105,7 @@ body {
     background-color: var(--secondary-color);
     border-radius: 8px;
     padding: 1rem;
+    min-width: 20em;
 }
 
 /* 目录树美化和自动换行，每行最多20个汉字 */
@@ -128,6 +129,7 @@ body {
     align-items: flex-start;
     flex-wrap: wrap;
     min-width: 0; /* 允许子元素收缩 */
+    width: 100%;
 }
 
 .directory-tree li > div:hover {
@@ -136,13 +138,13 @@ body {
 
 .directory-tree li > div span {
     display: inline-block;
-    max-width: 30em; /* 一行最多20个汉字 */
+    max-width: 20em;
+    min-width: 0;
     white-space: normal;
     word-break: break-all;
     overflow-wrap: break-word;
     vertical-align: top;
-    flex: 1 1 0%;
-    min-width: 0;
+    flex: 1 1 auto; /* 允许自动扩展 */
 }
 
 .directory-tree .triangle {
